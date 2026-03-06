@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTINEL | Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body class="flex flex-col items-center justify-center min-h-screen">
+    <div id="login-overlay" class="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-6">
+    <h2 class="text-cyan-400 mb-4 tracking-widest">ENTER MASTER TOKEN</h2>
+    <input type="password" id="token-input" class="bg-black border border-cyan-400 p-2 text-cyan-400 text-center mb-4">
+    <button onclick="saveToken()" class="border border-cyan-400 px-6 py-1 hover:bg-cyan-400 hover:text-black">ACCESS</button>
+</div>
+
+    <div class="command-box p-8 rounded-lg w-full max-w-md text-center">
+        <header class="mb-8">
+            <h1 class="text-2xl font-bold tracking-[0.2em] uppercase">Sentinel v1.0</h1>
+            <div id="connection-status" class="text-[10px] mt-1 text-cyan-400">● SYSTEM LINK ACTIVE</div>
+        </header>
+
+        <div class="flex justify-center mb-12">
+            <button id="pulse-btn" class="pulse-circle">
+                <span class="relative z-10">PULSE</span>
+                <div class="pulse-ring"></div>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="stat-card">
+                <label>SWITCH</label>
+                <button id="toggle-btn" class="status-off">DISARMED</button>
+            </div>
+            <div class="stat-card">
+                <label>TTL</label>
+                <div id="timer-display" class="text-xl font-mono">--:--:--</div>
+            </div>
+        </div>
+
+        <button id="panic-btn" class="panic-trigger mt-10">
+            INITIATE PURGE
+        </button>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
