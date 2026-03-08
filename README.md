@@ -43,17 +43,23 @@ Key Features
 
 File Structure
 --------------
-
-**PathDescriptionSentinel\_Server.exeThe Command Center.** The compiled FastAPI server managing system states and the mobile handshake.**Sentinel\_Dashboard.exeThe Guardian.** The compiled local GUI for managing vaults, themes, and offline limits.**index.htmlThe Interface.** The core mobile dashboard served by the Command Center.**static/The Logic Assets.** Contains script.js and style.css required for the web dashboard.**Sentinel\_v2/Source Code.** Contains the modular sentinel\_v2.pyw and the shredder.py payload.**requirements.txtThe Tools.** Precisely versioned libraries for environment replication.
+| File / Folder | Description |
+| :--- | :--- |
+| **`Sentinel_Server.exe`** | **The Command Center.** The compiled FastAPI server managing system states and the mobile handshake. |
+| **`Sentinel_Dashboard.exe`** | **The Guardian.** The compiled local GUI for managing vaults, themes, and offline limits. |
+| **`index.html`** | **The Interface.** The core mobile dashboard served by the Command Center. |
+| **`static/`** | **The Logic Assets.** Contains `script.js` and `style.css` required for the web dashboard. |
+| **`Sentinel_v2/`** | **The Source Code.** Contains the modular `sentinel_v2.pyw` and the `shredder.py` payload. |
+| **`requirements.txt`** | **The Tools.** Precisely versioned libraries for environment replication. |
 
 Installation & Build
 --------------------
 
-### 1\. Environment Setup
+### 1. Environment Setup
 
-PowerShell
-
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   python -m venv .venv  .\.venv\Scripts\activate  pip install -r requirements.txt   `
+```bash
+python -m venv .venv  .\.venv\Scripts\activate  pip install -r requirements.txt   
+```
 
 ### 2\. Compilation
 
@@ -61,15 +67,17 @@ To generate portable binaries, run these commands. **Strict Requirement:** Move 
 
 **Build Command Center:**
 
-PowerShell
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   pyinstaller --onefile --name "Sentinel_Server" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" main.py   `
+```bash
+pyinstaller --onefile --name "Sentinel_Server" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" main.py
+```
 
 **Build Local Dashboard:**
 
-PowerShell
 
-Plain textANTLR4BashCC#CSSCoffeeScriptCMakeDartDjangoDockerEJSErlangGitGoGraphQLGroovyHTMLJavaJavaScriptJSONJSXKotlinLaTeXLessLuaMakefileMarkdownMATLABMarkupObjective-CPerlPHPPowerShell.propertiesProtocol BuffersPythonRRubySass (Sass)Sass (Scss)SchemeSQLShellSwiftSVGTSXTypeScriptWebAssemblyYAMLXML`   pyinstaller --noconsole --onefile --name "Sentinel_Dashboard" --collect-all customtkinter "Sentinel_v2\sentinel_v2.pyw"   `
+```Bash
+pyinstaller --noconsole --onefile --name "Sentinel_Dashboard" --collect-all customtkinter "Sentinel_v2\sentinel_v2.pyw"
+```
 
 How to Run?
 -----------
