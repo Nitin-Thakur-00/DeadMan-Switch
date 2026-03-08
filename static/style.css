@@ -1,74 +1,100 @@
-/* Custom properties for easy color management */
-:root {
-    --neon-cyan: #00f3ff;
-    --neon-red: #ff0055;
-    --bg-dark: #050505;
-}
+/* ==========================================
+   SENTINEL PRO v2 - CUSTOM STYLESHEET
+   ========================================== */
 
+/* --- Base Form Resets & Scrollbars --- */
 body {
-    background-color: var(--bg-dark);
-    color: var(--neon-cyan);
-    font-family: 'Courier New', Courier, monospace;
+    -webkit-tap-highlight-color: transparent; /* Removes blue tap highlight on mobile */
+    overscroll-behavior-y: none; /* Prevents pull-to-refresh on mobile browsers */
 }
 
-.command-box {
-    border: 1px solid var(--neon-cyan);
-    background: rgba(0, 0, 0, 0.8);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+/* Custom Webkit Scrollbar for a sleek look if the page ever overflows */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #050505;
+}
+::-webkit-scrollbar-thumb {
+    background: #22d3ee; /* Tailwind Cyan-400 */
+    border-radius: 10px;
 }
 
+/* --- Pulse Button Effects --- */
 .pulse-circle {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    border: 2px solid var(--neon-cyan);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    letter-spacing: 2px;
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
     transition: all 0.3s ease;
 }
 
+.pulse-circle:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
+    background-color: rgba(34, 211, 238, 0.2);
+}
+
+/* Note: The actual expanding ring animation is handled by GSAP in script.js, 
+  but we ensure the element is properly positioned here. 
+*/
 .pulse-ring {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border: 1px solid var(--neon-cyan);
-    border-radius: 50%;
-    opacity: 0.5;
+    transform-origin: center;
+    will-change: transform, opacity;
 }
 
-.stat-card {
-    border-left: 3px solid var(--neon-cyan);
-    padding: 10px;
-    background: rgba(0, 243, 255, 0.05);
-    text-align: left;
+/* --- System Switch (Toggle) States --- */
+.status-off {
+    color: #6b7280; /* Tailwind Gray-500 */
+    border-color: #374151; /* Tailwind Gray-700 */
+    background-color: transparent;
+    box-shadow: none;
 }
 
-.stat-card label {
-    display: block;
-    font-size: 10px;
-    margin-bottom: 5px;
-    opacity: 0.7;
+.status-on {
+    color: #000000;
+    border-color: #22d3ee;
+    background-color: #22d3ee;
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
-/* Toggle Button States */
-.status-off { color: #fff; background: #222; padding: 2px 10px; border-radius: 4px; font-size: 12px; }
-.status-on { color: #000; background: var(--neon-cyan); padding: 2px 10px; border-radius: 4px; font-size: 12px; box-shadow: 0 0 10px var(--neon-cyan); }
-
+/* --- The 5-Second Panic Button --- */
 .panic-trigger {
-    width: 100%;
-    border: 1px solid var(--neon-red);
-    color: var(--neon-red);
-    padding: 12px;
-    font-size: 11px;
-    letter-spacing: 4px;
-    transition: 0.3s;
+    outline: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-.panic-trigger:hover {
-    background: var(--neon-red);
-    color: black;
+/* The charging animation background fill */
+#panic-progress {
+    /* The width transition is dynamically injected by JS, 
+       but we ensure the background stays purely visual.
+    */
+    z-index: 1; 
+}
+
+/* The intense shaking effect triggered during the long-press */
+.shaking {
+    animation: shake 0.15s cubic-bezier(.36,.07,.19,.97) both infinite;
+    background-color: rgba(220, 38, 38, 0.2) !important;
+    border-color: rgba(220, 38, 38, 1) !important;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4);
+    color: #fff !important;
+}
+
+/* Keyframes for the violent hardware shake */
+@keyframes shake {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    10%, 90% { transform: translate3d(-2px, 0, 0); }
+    20%, 80% { transform: translate3d(3px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* --- Lock Screen Enhancements --- */
+#tokenInput {
+    /* Glowing placeholder text */
+    text-shadow: 0 0 5px rgba(34, 211, 238, 0.2);
+}
+
+#tokenInput::placeholder {
+    text-shadow: none;
 }

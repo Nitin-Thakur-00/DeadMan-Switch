@@ -1,0 +1,17 @@
+
+local_config.json
+pulse_db.json
+shred_history.json
+
+.venv/
+__pycache__/
+*.pyc
+
+build/
+dist/
+*.spec
+
+.DS_Store
+Thumbs.db
+
+Setinel_v2/pycache__/

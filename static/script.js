@@ -1,127 +1,291 @@
-// Use the current window location to avoid hardcoding IP addresses
+// ==========================================
+// SENTINEL PRO v2 - DASHBOARD LOGIC
+// ==========================================
+
+// --- 1. Global State & Config ---
 const API_BASE = window.location.origin;
-
 let MASTER_TOKEN = sessionStorage.getItem("sentinel_token");
+let failedAttempts = 0;
+const MAX_TRIES = 5;
+let secondsRemaining = 0;
 
-// 1. Initial Auth Check
-if (MASTER_TOKEN) {
-    document.getElementById('login-overlay').style.display = 'none';
-    updateStatus(); // Start polling if already logged in
-}
+// Catch hidden mobile errors
+window.onerror = function(msg, url, linenumber) {
+    console.error('JS Error: ' + msg + '\nOn line: ' + linenumber);
+    return true;
+};
 
-// 2. Save Token (Login)
-function saveToken() {
-    const input = document.getElementById('token-input').value;
-    if (input.length > 0) {
-        sessionStorage.setItem("sentinel_token", input);
-        MASTER_TOKEN = input;
+// --- 2. Initialization & Auth ---
+document.addEventListener("DOMContentLoaded", () => {
+    checkExistingAuth();
+    startLocalClock();
+    setInterval(syncWithServer, 10000); // Poll server every 10s
+});
 
-        gsap.to("#login-overlay", {
-            opacity: 0, duration: 0.5, onComplete: () => {
-                document.getElementById('login-overlay').style.display = 'none';
-            }
-        });
-        updateStatus();
+async function checkExistingAuth() {
+    if (MASTER_TOKEN) {
+        const isValid = await verifyToken(MASTER_TOKEN);
+        if (isValid) {
+            hideOverlay();
+            syncWithServer();
+        } else {
+            sessionStorage.removeItem("sentinel_token");
+            MASTER_TOKEN = null;
+        }
     }
 }
 
-// --- Animations ---
-gsap.to(".pulse-ring", {
-    scale: 1.5,
-    opacity: 0,
-    duration: 2,
-    repeat: -1,
-    ease: "expo.out"
-});
+// --- 3. The Handshake (Login) ---
+async function unlockSentinel() {
+    const input = document.getElementById('tokenInput');
+    const errorMsg = document.getElementById('errorMsg');
+    
+    if (!input || !input.value) {
+        errorMsg.innerText = "TOKEN FIELD REQUIRED";
+        return;
+    }
 
-// --- UI Interactions ---
+    const token = input.value;
 
-// 3. Send Pulse (Heartbeat)
-document.getElementById('pulse-btn').addEventListener('click', async () => {
     try {
-        const response = await fetch(`${API_BASE}/pulse`, {
-            method: 'POST',
-            // CRITICAL: Must match the backend Header name exactly
-            headers: { 'x-token': MASTER_TOKEN }
+        const response = await fetch(`${API_BASE}/status`, {
+            method: 'GET',
+            headers: { 'token': token }
         });
 
         if (response.ok) {
-            gsap.fromTo(".pulse-circle",
-                { backgroundColor: "rgba(0, 243, 255, 0.4)" },
-                { backgroundColor: "transparent", duration: 0.5 }
-            );
+            // SUCCESS
+            sessionStorage.setItem("sentinel_token", token);
+            MASTER_TOKEN = token;
+            failedAttempts = 0;
+            hideOverlay();
+            syncWithServer();
+        } else if (response.status === 404) {
+            errorMsg.innerText = "⚠️ SYSTEM NOT INITIALIZED ON HOST PC";
+        } else if (response.status === 401) {
+            // SECURITY LOCKOUT LOGIC
+            failedAttempts++;
+            const remaining = MAX_TRIES - failedAttempts;
+            
+            if (remaining <= 0) {
+                errorMsg.innerText = "☢️ SYSTEM TERMINATED: MAX TRIES EXCEEDED";
+                errorMsg.style.color = "red";
+            } else {
+                errorMsg.innerText = `❌ ACCESS DENIED: ${remaining} TRIES LEFT`;
+            }
+            // GSAP Shake Effect
+            gsap.to("#tokenInput", { x: 10, duration: 0.1, repeat: 5, yoyo: true });
         } else {
-            alert("Pulse Failed: Check Token");
+            errorMsg.innerText = "UNKNOWN SERVER ERROR";
+        }
+    } catch (err) {
+        console.error(err);
+        errorMsg.innerText = "OFFLINE: CANNOT REACH COMMAND CENTER";
+    }
+}
+
+async function verifyToken(token) {
+    try {
+        const res = await fetch(`${API_BASE}/status`, {
+            headers: { 'token': token }
+        });
+        return res.ok; 
+    } catch (err) {
+        return false;
+    }
+}
+
+function hideOverlay() {
+    const lock = document.getElementById('lockScreen');
+    if (lock) {
+        gsap.to("#lockScreen", {
+            opacity: 0, 
+            duration: 0.8, 
+            ease: "power2.inOut",
+            onComplete: () => lock.style.display = 'none'
+        });
+    }
+}
+
+// --- 4. Interactive Dashboard Controls ---
+
+// Pulse Button Logic
+document.getElementById('pulse-btn').addEventListener('click', async () => {
+    if (!MASTER_TOKEN) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/pulse`, {
+            method: 'POST',
+            // Notice: /pulse uses 'x-token' per our FastAPI setup
+            headers: { 'x-token': MASTER_TOKEN } 
+        });
+
+        if (response.ok) {
+            // GSAP Expanding Ring Animation
+            gsap.fromTo(".pulse-ring", 
+                { scale: 1, opacity: 1 }, 
+                { scale: 2.5, opacity: 0, duration: 0.8, ease: "power2.out" }
+            );
+            syncWithServer(); // Immediately update the timer
+        } else {
+            location.reload(); // Boot if token became invalid
         }
     } catch (err) {
         console.error("Pulse Failed", err);
     }
 });
 
-// 4. Unified Toggle Logic
+// Toggle (Arm/Disarm) Logic
 document.getElementById('toggle-btn').addEventListener('click', async () => {
+    if (!MASTER_TOKEN) return;
+    
     const btn = document.getElementById('toggle-btn');
     const isCurrentlyArmed = btn.innerText === "ARMED";
     const nextState = !isCurrentlyArmed;
 
     try {
-        // Query param syntax: /toggle?status=true
         const res = await fetch(`${API_BASE}/toggle?status=${nextState}`, {
             method: 'POST',
-            headers: { 'x-token': MASTER_TOKEN }
+            headers: { 'token': MASTER_TOKEN }
         });
 
         if (res.ok) {
-            btn.innerText = nextState ? "ARMED" : "DISARMED";
-            btn.className = nextState ? "status-on" : "status-off";
+            updateToggleUI(nextState);
         } else {
-            const err = await res.json();
-            alert("Toggle Denied: " + (err.detail || "Check Token"));
+            location.reload();
         }
     } catch (err) {
-        alert("Server Unreachable");
+        console.error("Toggle Failed");
     }
 });
 
-// 5. Status Polling
-
-let secondsRemaining = 0;
-
-// Function A: Get the official time from the Server
-async function syncWithServer() {
-    try {
-        const res = await fetch(`${API_BASE}/status`);
-        const data = await res.json();
-
-        // Sync our local variable with the server's truth
-        secondsRemaining = data.seconds_remaining;
-
-        // Update the connection indicator
-        document.getElementById('connection-status').innerText = "● SYSTEM LINK ACTIVE";
-        document.getElementById('connection-status').style.color = "#00f3ff";
-    } catch (err) {
-        document.getElementById('connection-status').innerText = "● OFFLINE";
-        document.getElementById('connection-status').style.color = "red";
+function updateToggleUI(isArmed) {
+    const btn = document.getElementById('toggle-btn');
+    if (isArmed) {
+        btn.innerText = "ARMED";
+        btn.className = "status-on w-full py-2 font-bold tracking-wider transition-all duration-300";
+    } else {
+        btn.innerText = "DISARMED";
+        btn.className = "status-off w-full py-2 font-bold tracking-wider border border-gray-700 text-gray-400 transition-all duration-300";
     }
 }
 
-// Function B: The "Smooth Ticker" (Runs every 1 second locally)
+// --- 5. The 5-Second Panic Button (Nuclear Option) ---
+const panicBtn = document.getElementById('panic-btn');
+const panicProgress = document.getElementById('panic-progress');
+const panicText = document.getElementById('panic-text');
+
+let holdTimer;
+const holdDuration = 5000; 
+
+const startHold = (e) => {
+    if (!MASTER_TOKEN) return;
+    if (e) e.preventDefault(); // Stop mobile haptic/scroll interference
+    
+    panicText.innerText = "HOLDING...";
+    panicBtn.style.borderColor = "#ef4444"; // Turn border red
+    
+    // Smooth CSS transition for the red fill bar
+    panicProgress.style.transition = `width ${holdDuration}ms linear`;
+    panicProgress.style.width = '100%';
+
+    holdTimer = setTimeout(() => {
+        executePurge();
+    }, holdDuration);
+};
+
+const cancelHold = () => {
+    clearTimeout(holdTimer);
+    panicText.innerText = "HOLD 5s TO PURGE";
+    panicBtn.style.borderColor = "rgba(127, 29, 29, 0.5)"; // Reset border
+    
+    // Snap the red bar back to 0 instantly
+    panicProgress.style.transition = 'none';
+    panicProgress.style.width = '0%';
+};
+
+async function executePurge() {
+    try {
+        const res = await fetch(`${API_BASE}/panic`, {
+            method: 'POST',
+            headers: { 'token': MASTER_TOKEN }
+        });
+
+        if (res.ok) {
+            // Visual feedback before reload
+            panicText.innerText = "TERMINATED";
+            panicProgress.style.backgroundColor = "#ff0000";
+            
+            setTimeout(() => {
+                sessionStorage.clear();
+                window.location.reload();
+            }, 1000);
+        }
+    } catch (err) {
+        alert("CRITICAL ERROR: SERVER UNREACHABLE");
+    }
+}
+
+// Bind Panic Events - Using proper option objects for Mobile
+panicBtn.addEventListener('mousedown', startHold);
+panicBtn.addEventListener('mouseup', cancelHold);   
+panicBtn.addEventListener('mouseleave', cancelHold);
+
+// Mobile Touch Events with Passive: False to allow preventDefault()
+panicBtn.addEventListener('touchstart', startHold, { passive: false });
+panicBtn.addEventListener('touchend', cancelHold, { passive: false });
+
+// --- 6. Synchronization & Background Clock ---
+
+async function syncWithServer() {
+    if (!MASTER_TOKEN) return;
+    
+    try {
+        const res = await fetch(`${API_BASE}/status`, {
+            headers: { 'token': MASTER_TOKEN }
+        });
+        
+        if (res.status === 401) location.reload(); 
+        
+        const data = await res.json();
+        
+        // Sync Time
+        secondsRemaining = data.seconds_remaining;
+        
+        // Sync Toggle UI
+        updateToggleUI(data.is_active);
+
+        // Sync Connection Status
+        const statusEl = document.getElementById('connection-status');
+        if (data.should_wipe) {
+            statusEl.innerText = "☢️ PURGE IN PROGRESS";
+            statusEl.style.color = "red";
+        } else {
+            statusEl.innerText = "● SYSTEM LINK ACTIVE";
+            statusEl.style.color = "#22d3ee"; // Cyan
+        }
+    } catch (err) {
+        const statusEl = document.getElementById('connection-status');
+        statusEl.innerText = "● OFFLINE";
+        statusEl.style.color = "red";
+    }
+}
+
 function startLocalClock() {
     setInterval(() => {
+        const timerDisplay = document.getElementById('timer-display');
+        
         if (secondsRemaining > 0) {
-            secondsRemaining--; // Drop 1 second locally
-
+            secondsRemaining--;
             const h = Math.floor(secondsRemaining / 3600);
             const m = Math.floor((secondsRemaining % 3600) / 60);
             const s = Math.floor(secondsRemaining % 60);
-
-            document.getElementById('timer-display').innerText =
+            timerDisplay.innerText = 
                 `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            timerDisplay.style.color = "#22d3ee";
+        } else if (secondsRemaining === 0) {
+            timerDisplay.innerText = "00:00:00";
+            timerDisplay.style.color = "red";
         }
     }, 1000);
 }
-
-// Start everything
-syncWithServer();           // Initial sync
-setInterval(syncWithServer, 10000); // Sync with server every 10s to stay accurate
-startLocalClock();          // Start the smooth 1s ticker
