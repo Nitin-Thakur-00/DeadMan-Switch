@@ -1,129 +1,115 @@
-# 🐘 PHP Learning Lab: Environment Setup & Basics
+Sentinel v2.0 | Dead Man's Switch
+=================================
 
-A hands-on experiment to master PHP fundamentals, from environment configuration to working with variables, data types, and system information.
+> **A Tiered, Remote-Controlled Security Ecosystem protecting local data through stealth, Win32 kernel deception, and cryptographic shredding.**
 
-## 📋 Overview
+Overview
+--------
 
-This experiment consists of four progressive exercises that will take you from complete beginner to confidently writing PHP scripts. You'll learn how to set up development environments, understand PHP's output mechanisms, work with variables and data types, and even build a professional system information dashboard.
+Sentinel v2.0 transitions from a script-based project into a fully compiled, portable security suite. It utilizes a **Zero-Trust tri-modular architecture** to execute defensive payloads based on remote telemetry and local heartbeat monitoring.
 
-## 🎯 Learning Objectives
+Unlike standard encryption tools, Sentinel uses **Adaptive Tiered Defense**:
 
-By completing these exercises, you'll be able to:
-- Set up and verify a PHP development environment (XAMPP)
-- Use PHP's built-in development server
-- Write PHP scripts using different output methods (`echo`, `var_dump`, `print_r`)
-- Work with variables, constants, and all PHP data types
-- Access server information using PHP superglobals
-- Format dates and times in PHP
-- Implement basic loops and arrays
+*   **Stealth Mode:** Automatically hides vault folders from the OS kernel using Win32 API attributes (0x02 | 0x04) if the device loses connection to the server.
+    
+*   **Nuclear Mode:** Triggered via the mobile dashboard or offline timeout, it shreds data by overwriting it with random bitstreams and initiates a **Total Self-Destruction** of the project directory.
+    
 
-## 📁 Project Structure
+🆕 WHAT'S NEW in v2.0
+---------------------
 
-```text
-Exp_8/
-├── Exercise 1/
-│   ├── info.php              # (temporary - delete after use!)
-│   └── Screenshots...
-├── Exercise 2/
-│   ├── about.php
-│   ├── index.php
-│   └── Screenshots...
-├── Exercise 3/
-│   ├── constants.php         
-│   ├── data_types.php        
-│   ├── profile.php           
-│   └── Screenshots...
-└── Exercise 4/
-    ├── sysinfo.php           
-    └── Screenshots...
+*   **Decoupled UI Logic:** Features a zero-latency 30-second warning window that remains synchronized with the backend even under high CPU load.
+    
+*   **Brute-Force Protection:** The Command Center implements a strike counter that triggers an auto-purge if an incorrect token is entered 5 times via the web interface.
+    
+*   **Anti-Forensic Shredding:** Implements cryptographic wipes that overwrite target sectors multiple times to defeat professional recovery tools, followed by filename metadata scrambling.
+    
+*   **Portable Binary Architecture:** Compiled into standalone executables that carry their own Python environment, allowing deployment on any Windows machine without pre-installed dependencies.
+    
+*   **Ghost Protocol Deletion:** Uses a detached, invisible batch script to bypass Windows "File in Use" locks, ensuring a 100% clean wipe of the root project folder.
+    
+
+Key Features
+------------
+
+*   **Zero-Latency Sync:** A high-precision timer system using math.ceil logic to ensure the mobile dashboard, local GUI, and warning alerts are locked to the same second.
+    
+*   **Secure Handshake:** Requires a high-complexity Master Token (8+ chars, Uppercase, Number, & Symbol) to authorize state changes or "Pulse" signals.
+    
+*   **Shred History:** A persistent local log in AppData that records timestamps and folder names of all successful destruction events.
+    
+*   **Customizable Aesthetics:** Built-in theme engine supporting Dark, Light, Translucent, and fully custom HEX-coded UI backgrounds.
+    
+
+File Structure
+--------------
+| File / Folder | Description |
+| :--- | :--- |
+| **`Sentinel_Server.exe`** | **The Command Center.** The compiled FastAPI server managing system states and the mobile handshake. |
+| **`Sentinel_Dashboard.exe`** | **The Guardian.** The compiled local GUI for managing vaults, themes, and offline limits. |
+| **`index.html`** | **The Interface.** The core mobile dashboard served by the Command Center. |
+| **`static/`** | **The Logic Assets.** Contains `script.js` and `style.css` required for the web dashboard. |
+| **`Sentinel_v2/`** | **The Source Code.** Contains the modular `sentinel_v2.pyw` and the `shredder.py` payload. |
+| **`requirements.txt`** | **The Tools.** Precisely versioned libraries for environment replication. |
+
+Installation & Build
+--------------------
+
+### 1. Environment Setup
+
+```bash
+python -m venv .venv  .\.venv\Scripts\activate  pip install -r requirements.txt   
 ```
 
-## 🚀 Exercises
+### 2\. Compilation
 
-### Exercise 1: Install & Verify Your Environment
+To generate portable binaries, run these commands. **Strict Requirement:** Move the resulting .exe files from dist/ to the **Root Folder** after completion.
 
-Set up a proper PHP development environment using XAMPP.
+**Build Command Center:**
 
-**Steps:**
-1. Download XAMPP from [apachefriends.org](https://www.apachefriends.org/)
-2. Install with default settings
-3. Start Apache from the XAMPP Control Panel
-4. Create an `info.php` file under your project directory with `<?php phpinfo(); ?>`
-5. Visit the associated local URL based on your configuration.
-6. **Important:** Delete `info.php` immediately after checking!
 
-**Screenshots:**
-![XAMPP Setup 1](Exercise%201/Screenshot%202026-04-06%20104702.png)
-![XAMPP Setup 2](Exercise%201/Screenshot%202026-04-06%20104906.png)
-![PHP Info](Exercise%201/Screenshot%202026-04-06%20105914.png)
+```bash
+pyinstaller --onefile --name "Sentinel_Server" --hidden-import="uvicorn.logging" --hidden-import="uvicorn.loops" --hidden-import="uvicorn.loops.auto" --hidden-import="uvicorn.protocols" --hidden-import="uvicorn.protocols.http" --hidden-import="uvicorn.protocols.http.auto" --hidden-import="uvicorn.lifespan" --hidden-import="uvicorn.lifespan.on" main.py
+```
 
-> **💡 Troubleshooting:** If Apache won't start on port 80, change to port 8080 in `httpd.conf` and use `http://localhost:8080/`
+**Build Local Dashboard:**
 
-### Exercise 2: The Built-in PHP Server
 
-Learn to run PHP without Apache using the lightweight built-in server.
+```Bash
+pyinstaller --noconsole --onefile --name "Sentinel_Dashboard" --collect-all customtkinter "Sentinel_v2\sentinel_v2.pyw"
+```
 
-**Steps:**
-1. Verify PHP is available: `php --version`
-2. Open terminal in the development folder.
-3. Run the built-in server: `php -S localhost:8000`
-4. Test PHP files via `localhost:8000`.
-5. Watch terminal logs for request status codes.
-6. Stop server with `Ctrl+C`.
+How to Run?
+-----------
 
-**Screenshots:**
-![Built-in Server 1](Exercise%202/Screenshot%202026-04-06%20110142.png)
-![Built-in Server 2](Exercise%202/Screenshot%202026-04-06%20111338.png)
-![Terminal Log](Exercise%202/Screenshot%202026-04-06%20111904.png)
+The system must be activated in the following sequence to maintain the Zero-Trust handshake:
 
-> **💡 Windows PATH Note:** If `php` isn't recognized, add `C:\xampp\php` to your system PATH via Environment Variables.
+### Step 1: The Command Center (Sentinel\_Server.exe)
 
-### Exercise 3: PHP Basics — Output and Variables
+*   Note the **Mobile Dashboard IP** provided in the terminal.
+    
 
-Create three scripts demonstrating PHP's output methods and variable handling.
+### Step 2: The Guardian (Sentinel\_Dashboard.exe)
 
-**Files Created:**
-- **`profile.php`**: Personal information page
-- **`constants.php`**: Constants demonstration
-- **`data_types.php`**: Type exploration
+*   Initialize your Master Token (8+ chars, Upper, Number, & Symbol).
+    
+*   Add your target Vaults and set specific **Offline Limits**.
+    
 
-**Screenshots:**
-![Profile Output](Exercise%203/Screenshot%202026-04-06%20112426.png)
-![Constants Output](Exercise%203/Screenshot%202026-04-06%20112638.png)
-![Data Types Output](Exercise%203/Screenshot%202026-04-06%20112803.png)
+### Step 3: The Remote Dashboard
 
-> **💡 Pro Tip:** Always wrap debugging output: `echo '<pre>'; var_dump($var); echo '</pre>';`
+*   Access the IP on your smartphone and enter the Master Token.
+    
+*   Toggle the system to **ARMED** to begin active monitoring.
+    
 
-### Exercise 4: Challenge — Build a PHP System Info Page
+⚠️ Critical Warnings
+--------------------
 
-Create a professional-looking system information dashboard that showcases real PHP functionality.
-
-**`sysinfo.php` features:**
-- Display: PHP version, OS, max integer, EOL type
-- Show today's date and a live clock
-- Server info: `$_SERVER['DOCUMENT_ROOT']` and `$_SERVER['SCRIPT_FILENAME']`
-- Array of favorite technologies displayed with `foreach` loop
-
-**Screenshot:**
-![System Info Dashboard](Exercise%204/Screenshot%202026-04-06%20113122.png)
-
-## 💡 Key PHP Concepts Covered
-
-| Concept | Exercise | Key Functions/Features |
-|---------|----------|------------------------|
-| Environment setup | 1, 2 | XAMPP, built-in server |
-| Output methods | 3 | `echo`, `var_dump`, `print_r` |
-| Variables | 3 | `$variable`, type checking |
-| Constants | 3 | `define()`, magic constants |
-| Data types | 3 | scalar, compound, special types |
-| Superglobals | 4 | `$_SERVER` |
-| Date/Time | 4 | `date()` function |
-| Arrays & loops | 4 | indexed arrays, `foreach` |
-| String handling | 3 | quotes, concatenation |
-
-## 📚 What You'll Learn Beyond Code
-
-- **Security habits:** Never leave `phpinfo()` on a production server
-- **Debugging techniques:** Using `var_dump()` and `print_r()` effectively
-- **Server awareness:** Understanding document roots, script paths, and request lifecycle
-- **Environment differences:** XAMPP vs built-in server use cases
+*   **Permanent Data Loss:** The Nuclear Trigger is irreversible. Shredded data cannot be recovered by forensic software.
+    
+*   **Operational Order:** Starting the Dashboard before the Server will result in a connection error.
+    
+*   **Privacy:** Never push local\_config.json, pulse\_db.json, or shred\_history.json to GitHub, as they contain your Master Token and forensic logs.
+    
+*   **Space Bug:** Avoid project paths with excessive spaces; while v2.0 includes quote-handling fixes, the system remains optimized for standard Windows user directories.
